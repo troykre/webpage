@@ -1,1 +1,11 @@
 pandas==2.2.3
+yfinance
+streamlit
+numpy
+pandas
+matplotlib
+plotly
+scikit-learn
+seaborn
+statsmodels
+scipy

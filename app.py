@@ -1,16 +1,16 @@
 import streamlit as st
-import home
-import about
-import contact
+import overview
+import metrics
+import strategy
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.selectbox("Choose a page", ["Home", "About", "Contact"])
+page = st.sidebar.selectbox("Choose a page", ["Overview", "Metrics", "Strategy"])
 
 # Navigation logic
-if page == "Home":
-    home.app()
-elif page == "About":
-    about.app()
-elif page == "Contact":
-    contact.app()
+if page == "Overview":
+    overview.app()
+elif page == "Metrics":
+    metrics.app()
+elif page == "Strategy":
+    strategy.app()
