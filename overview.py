@@ -1,8 +1,8 @@
 import streamlit as st
 import yfinance as yf
-import streamlit as st
-import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from PIL import Image
@@ -12,7 +12,6 @@ from statsmodels.tsa.stattools import adfuller
 from sklearn.linear_model import LinearRegression
 import os
 import math
-import datetime as dt
 import seaborn as sns
 sns.set()
 import statsmodels.graphics.tsaplots as sgt 
@@ -26,22 +25,42 @@ import warnings
 warnings.filterwarnings('ignore')
 
 @st.cache_data
-def load_data(ticker):
-    data = yf.download(ticker)
+def load_data(ticker, start_date, end_date):
+    data = yf.Ticker(ticker).history(start=start_date, end=end_date).reset_index()
+    data['Date'] = pd.to_datetime(data['Date'])
+    data['Date'] = data['Date'].dt.strftime('%Y-%m-%d')
     return data
 
-# Load and clean data
-# Define the ticker symbol for Bitcoin
-ticker_symbol = 'BTC-USD'
+def app():
+    st.title("Crypto Overview")
+    st.write("Crypto Analysis ...")
 
-# Fetch Bitcoin data
-BTC_data = yf.Ticker(ticker_symbol).history(period='10y').reset_index()
-#BTC_data = pd.read_csv("BTC-USD.csv")
-BTC_data['Date'] = pd.to_datetime(BTC_data['Date'])
-BTC_data['Date'] = BTC_data['Date'].dt.strftime('%Y-%m-%d')
-start_date = '2015-01-01'
-end_date = '2024-01-01'
-BTC_data = BTC_data[(BTC_data['Date'] >= start_date) & (BTC_data['Date'] < end_date)]
+    ticker = st.text_input("Enter a stock ticker", ticker_symbol)
+    duration = st.selectbox("Select duration", ["1 month", "3 months", "6 months", "1 year", "18 months", "3 years", "5 years", "10 years", "Custom"])
+
+    if duration == "Custom":
+        start_date = st.date_input("Start date", datetime.today() - timedelta(days=365))
+        end_date = st.date_input("End date", datetime.today())
+    else:
+        duration_mapping = {
+            "1 month": 30,
+            "3 months": 90,
+            "6 months": 180,
+            "1 year": 365,
+            "18 months": 547,
+            "3 years": 1095,
+            "5 years": 1825,
+            "10 years": 3650
+        }
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=duration_mapping[duration])
+
+    data = load_data(ticker, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+    st.line_chart(data.set_index('Date')['Close'])
+
+# Load and clean data for Bitcoin
+ticker_symbol = 'BTC-USD'
+BTC_data = load_data(ticker_symbol, (datetime.today() - timedelta(days=365*10)).strftime('%Y-%m-%d'), datetime.today().strftime('%Y-%m-%d'))
 BTC_data = BTC_data[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
 BTC_data.set_index('Date', inplace=True)
 
@@ -56,9 +75,28 @@ def app():
     st.title("Crypto Overview")
     st.write("Crypto Analysis ...")
 
-    ticker = st.text_input("Enter a stock ticker", "AAPL")
-    data = load_data(ticker)
-    st.line_chart(data['Close'])
+    ticker = st.text_input("Enter a stock ticker", ticker_symbol)
+    duration = st.selectbox("Select duration", ["1 month", "3 months", "6 months", "1 year", "18 months", "3 years", "5 years", "10 years", "Custom"])
+
+    if duration == "Custom":
+        start_date = st.date_input("Start date", datetime.today() - timedelta(days=365))
+        end_date = st.date_input("End date", datetime.today())
+    else:
+        duration_mapping = {
+            "1 month": 30,
+            "3 months": 90,
+            "6 months": 180,
+            "1 year": 365,
+            "18 months": 547,
+            "3 years": 1095,
+            "5 years": 1825,
+            "10 years": 3650
+        }
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=duration_mapping[duration])
+
+    data = load_data(ticker, start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d'))
+    st.line_chart(data.set_index('Date')['Close'])
 
     # Create a dropdown menu for different analysis options
     analysis_option = st.selectbox("Select Analysis", ["Volume Analysis", "Yearly Trends", "Quarterly Trends", "Regression Analysis",
@@ -102,7 +140,7 @@ def app():
         st.subheader("Yearly Trends for Close Prices")
         
         # Add a dropdown to select the year
-        selected_year = st.selectbox("Select Year", range(2015, 2024))
+        selected_year = st.selectbox("Select Year", range(2020, 2025))
         
         # Filter data for the selected year
         year_data = BTC_data[f'{selected_year}-01-01':f'{selected_year}-12-31']
