@@ -120,8 +120,8 @@ def app():
         # Add a dropdown to select the year
         #selected_year = st.selectbox("Select Year", range(2015, 2024))
         
-        selected_year = str(end_date.year)
-
+        selected_year = "2023"
+        
         # Filter data for the selected year
         year_data = BTC_data[f'{selected_year}-01-01':f'{selected_year}-12-31']
 
