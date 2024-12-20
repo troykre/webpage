@@ -115,13 +115,130 @@ def app():
         st.line_chart(btc['Volume'])
 
     elif analysis_option == "Yearly Trends":
-        st.subheader("Yearly Trends")
+        st.subheader("Yearly Trends for Close Prices")
+        
+        # Add a dropdown to select the year
+        #selected_year = st.selectbox("Select Year", range(2015, 2024))
+        
+        selected_year = str(end_date.year)
 
-        # Resample data to yearly frequency and calculate mean
-        yearly_data = btc['Close'].resample('Y').mean()
+        # Filter data for the selected year
+        year_data = BTC_data[f'{selected_year}-01-01':f'{selected_year}-12-31']
 
-        # Create a line chart to visualize yearly trends
-        st.line_chart(yearly_data)
+        # Create a line chart for the Close prices
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=year_data.index,
+            y=year_data['Close'],
+            mode='lines',
+            name=f'Bitcoin Close Prices ({selected_year})',
+            line=dict(color='blue')
+        ))
+
+        # Customize the appearance of the chart
+        fig.update_layout(
+            title=f'Bitcoin Close Price Trend ({selected_year})',
+            xaxis_title='Date',
+            yaxis_title='Price ($)',
+            xaxis_rangeslider_visible=True,
+            xaxis_showgrid=True,
+            yaxis_showgrid=True,
+            yaxis_gridcolor='lightgray',
+        )
+        # Show the chart
+        st.plotly_chart(fig)   
+        st.markdown(f"### Bitcoin Close Price Trend {selected_year}")
+        st.markdown(f"This line chart displays the trend of Bitcoin's close prices for the year {selected_year}.")
+        st.markdown("The blue line represents the close prices, and it shows how they fluctuated throughout the year.")           
+        
+        
+        st.write("\n\n\n", "") 
+        st.write("\n\n\n", "") 
+              
+        # Filter data for the selected year
+        year_data = BTC_data[f'{selected_year}-01-01':f'{selected_year}-12-31']
+        # Convert the index to a DateTimeIndex
+        year_data.index = pd.to_datetime(year_data.index)
+        # Calculate monthly average high, low, open, and close prices for the selected year
+        monthly_averages = year_data.resample('M').mean()
+        # Create a DataFrame for the monthly averages
+        monthly_averages['Month'] = monthly_averages.index.strftime('%B %Y')
+
+        
+        # Create a bar graph for the monthly average High and Low prices with custom styling
+        fig_high_low = go.Figure()
+        # Add the High price as a bar
+        fig_high_low.add_trace(go.Bar(
+            x=monthly_averages['Month'],
+            y=monthly_averages['High'],
+            name='High',
+            marker_color='rgb(0, 102, 204)'  # Custom color for High price bars
+        ))
+
+        # Add the Low price as a bar
+        fig_high_low.add_trace(go.Bar(
+            x=monthly_averages['Month'],
+            y=monthly_averages['Low'],
+            name='Low',
+            marker_color='rgb(255, 0, 0)'  # Custom color for Low price bars
+        ))
+
+        # Customize the appearance of the High and Low chart
+        fig_high_low.update_xaxes(type='category')  # Set x-axis type to category
+        fig_high_low.update_layout(
+            barmode='group',  # Set bar mode to group for side-by-side bars
+            title=f'Monthly Average High and Low Prices for {selected_year}',
+            xaxis_title='Month',
+            yaxis_title='Price ($)',
+            legend_title='Price Type',
+            legend=dict(x=0.85, y=1.0),  # Position of the legend
+        )
+
+        # Show the High and Low chart with a description
+        st.plotly_chart(fig_high_low)
+        st.markdown("### Monthly Average High and Low Prices")
+        st.markdown(f"This bar chart displays the monthly average High and Low prices for the year {selected_year}.")
+        st.markdown("The blue bars represent High prices, and the red bars represent Low prices.")
+
+        
+        st.write("\n\n\n", "") 
+        st.write("\n\n\n", "") 
+        # Create a bar graph for the monthly average Open and Close prices with custom styling
+        fig_open_close = go.Figure()
+
+        # Add the Open price as a bar
+        fig_open_close.add_trace(go.Bar(
+            x=monthly_averages['Month'],
+            y=monthly_averages['Open'],
+            name='Open',
+            marker_color='rgb(0, 204, 0)'  # Custom color for Open price bars
+        ))
+
+        # Add the Close price as a bar
+        fig_open_close.add_trace(go.Bar(
+            x=monthly_averages['Month'],
+            y=monthly_averages['Close'],
+            name='Close',
+            marker_color='rgb(255, 153, 0)'  # Custom color for Close price bars
+        ))
+
+        # Customize the appearance of the Open and Close chart
+        fig_open_close.update_xaxes(type='category')  # Set x-axis type to category
+        fig_open_close.update_layout(
+            barmode='group',  # Set bar mode to group for side-by-side bars
+            title=f'Monthly Average Open and Close Prices for {selected_year}',
+            xaxis_title='Month',
+            yaxis_title='Price ($)',
+            legend_title='Price Type',
+            legend=dict(x=0.85, y=1.0),  # Position of the legend
+        )
+
+        # Show the Open and Close chart with a description
+        st.plotly_chart(fig_open_close)
+        st.markdown("### Monthly Average Open and Close Prices")
+        st.markdown(f"This bar chart displays the monthly average Open and Close prices for the year {selected_year}.")
+        st.markdown("The green bars represent Open prices, and the orange bars represent Close prices.")
 
     elif analysis_option == "Quarterly Trends":
         st.subheader("Quarterly Trends")
