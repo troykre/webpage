@@ -1,7 +1,28 @@
-import streamlit as st
 import yfinance as yf
+import streamlit as st
+import numpy as np
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from PIL import Image
+from urllib.request import urlopen
+import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+from sklearn.linear_model import LinearRegression
+import os
+import math
 from datetime import datetime, timedelta
+import seaborn as sns
+sns.set()
+import statsmodels.graphics.tsaplots as sgt 
+import statsmodels.tsa.stattools as sts 
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.seasonal import seasonal_decompose
+import scipy.stats
+from scipy import stats
+import pylab
+import warnings
+warnings.filterwarnings('ignore')
 
 @st.cache_data
 def load_data(ticker, start_date, end_date):
@@ -43,19 +64,36 @@ def app():
 
     if analysis_option == "Regression Analysis":
         st.subheader("Regression Analysis")
-        st.write(f"""
-        ### Overview
 
-        This regression analysis provides insights into the linear relationship between time (days) and Bitcoin's closing prices for the selected duration.
+        # Perform linear regression analysis
+        if len(btc) > 1:
+            X = np.arange(len(btc)).reshape(-1, 1)
+            y = btc['Close'].values.reshape(-1, 1)
 
-        ### Insights
+            # Create and fit the linear regression model
+            model = LinearRegression()
+            model.fit(X, y)
 
-        - The regression results table displays the coefficient, intercept, and R-squared value, indicating how well the regression line fits the data.
-        - The scatter plot shows the actual Bitcoin prices (in blue), and the red line represents the regression line.
-        - Analyze how well the linear regression model captures the price trend.
+            # Create a DataFrame to store the results
+            results = pd.DataFrame({
+                'Coefficient': [model.coef_[0][0]],
+                'Intercept': [model.intercept_[0]],
+                'R-squared': [model.score(X, y)]
+            })
 
-        Explore the results and plot to gain insights into Bitcoin's price behavior.
-        """)
+            # Display the regression results
+            st.subheader("Regression Results")
+            st.table(results)
+
+            # Plot the regression line
+            st.markdown("### Regression Line Plot")
+            plt.figure(figsize=(10, 6))
+            plt.scatter(X, y, label='Actual Prices', color='blue')
+            plt.plot(X, model.predict(X), label='Regression Line', color='red')
+            plt.xlabel('Days')
+            plt.ylabel('Close Price')
+            plt.legend()
+            st.pyplot(plt)
 
     elif analysis_option == "Volatility Analysis":
         st.subheader("Volatility Analysis")
