@@ -24,6 +24,12 @@ from scipy import stats
 import pylab
 import warnings
 warnings.filterwarnings('ignore')
+
+@st.cache
+def load_data(ticker):
+    data = yf.download(ticker)
+    return data
+
 # Load and clean data
 # Define the ticker symbol for Bitcoin
 ticker_symbol = 'BTC-USD'
@@ -49,6 +55,10 @@ btc.sort_index(ascending=True, inplace=True)
 def app():
     st.title("Crypto Overview")
     st.write("Crypto Analysis ...")
+
+    ticker = st.text_input("Enter a stock ticker", "AAPL")
+    data = load_data(ticker)
+    st.line_chart(data['Close'])
 
     # Create a dropdown menu for different analysis options
     analysis_option = st.selectbox("Select Analysis", ["Volume Analysis", "Yearly Trends", "Quarterly Trends", "Regression Analysis",
@@ -424,4 +434,4 @@ def app():
         
     elif analysis_option == "Other Analysis":
           st.subheader("Other Analysis")
-            # Add content for other analysis options here   
+            # Add content for other analysis options here

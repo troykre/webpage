@@ -1,5 +1,4 @@
-pandas==2.2.3
-yfinance
+requests
 streamlit
 numpy
 pandas
