@@ -25,7 +25,7 @@ import pylab
 import warnings
 warnings.filterwarnings('ignore')
 
-@st.cache
+@st.cache_data
 def load_data(ticker):
     data = yf.download(ticker)
     return data
